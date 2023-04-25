@@ -221,7 +221,7 @@ function LoginForm(parent, open) {
 
 const nechto = new LoginForm(document.body, true);
 
-// 6. у меня появлется второй инпут когда ввожу данные в первый
+// 6.  все работает
 
 function Password(parent, open) {
   const input = document.createElement("input");
@@ -299,6 +299,9 @@ password1.input.addEventListener("input", passwordCheck);
 password2.input.addEventListener("input", passwordCheck);
 
 function passwordCheck() {
+  if (password1.getOpen()) {
+    return;
+  }
   if (password1.getValue() !== password2.getValue()) {
     password1.setStyle("margin: 10px; border-color: red;");
     password2.setStyle("margin: 10px; border-color: red;");
@@ -310,3 +313,111 @@ function passwordCheck() {
 
 password1.setOpen(true);
 password2.setOpen(false);
+
+// 6.1  ДИЧЬ!!!! тоже работает но подозрительно
+
+function Password(parent, open) {
+  const input = document.createElement("input");
+  input.type = open ? "text" : "password";
+  parent.append(input);
+
+  const button = document.createElement("button");
+  button.innerText = open ? "скрыть" : "показать";
+  parent.append(button);
+
+  this.setValue = function (value) {
+    input.value = value;
+  };
+
+  this.getValue = function () {
+    return input.value;
+  };
+
+  // onChange изменение текста в поле
+
+  input.oninput = () => {
+    if (typeof this.onChange === "function") {
+      this.onChange(input.value);
+    }
+  };
+
+  // onOpenChange измение видимости поля
+
+  button.onclick = () => {
+    open = !open;
+    input.type = open ? "text" : "password";
+    button.innerText = open ? "скрыть" : "показать";
+
+    if (typeof this.onOpenChange === "function") {
+      this.onOpenChange(open);
+    }
+  };
+
+  this.setOpen = function (value) {
+    open = value;
+    input.type = open ? "text" : "password";
+    button.innerText = open ? "скрыть" : "показать";
+
+    if (typeof this.onOpenChange === "function") {
+      this.onOpenChange(open);
+    }
+  };
+
+  this.getOpen = function () {
+    return open;
+  };
+
+  this.setStyle = function (style) {
+    input.style = style;
+  };
+  this.input = input;
+  this.button = button;
+}
+
+const password1 = new Password(document.body, true);
+password1.setStyle("margin: 10px");
+
+const password2 = new Password(document.body, true);
+password2.setStyle("margin: 10px");
+
+password1.onOpenChange = (open) => {
+  if (!password1.getOpen()) {
+    return;
+  }
+
+  if (open) {
+    password2.setStyle("display:none;");
+    password2.button.style = "display:none;";
+  } else {
+    password2.setStyle("margin: 10px");
+    password2.button.style = "display:inline-block;";
+    password2.input.type = "password";
+    password2.button.innerText = open ? "скрыть" : "показать";
+  }
+};
+
+password1.onChange = () => {
+  {
+    if (password1.getOpen()) {
+      return;
+    }
+    if (password1.getValue() !== password2.getValue()) {
+      password1.setStyle("margin: 10px; border-color: red;");
+      password2.setStyle("margin: 10px; border-color: red;");
+    } else {
+      password1.setStyle("margin: 10px");
+      password2.setStyle("margin: 10px");
+    }
+  }
+};
+password2.onChange = () => {
+  if (password1.getValue() !== password2.getValue()) {
+    password1.setStyle("margin: 10px; border-color: red;");
+    password2.setStyle("margin: 10px; border-color: red;");
+  } else {
+    password1.setStyle("margin: 10px");
+    password2.setStyle("margin: 10px");
+  }
+};
+// password1.onOpenChange(false)
+password1.onOpenChange(true);
